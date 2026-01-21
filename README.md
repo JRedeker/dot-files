@@ -7,24 +7,30 @@ A curated OpenCode configuration with ZSH enhancements and Vision MCP Manager fo
 Run this in **PowerShell** (as Administrator):
 
 ```powershell
-# One-liner: Download and run the Windows setup script
-irm https://raw.githubusercontent.com/JRedeker/dot-files/trunk/windows-setup.ps1 | iex
+# Download and run the setup script
+irm https://raw.githubusercontent.com/JRedeker/dot-files/trunk/windows-setup.ps1 -OutFile ws.ps1; .\ws.ps1
 ```
 
-Or step-by-step:
+The script runs in two phases:
+
+**Phase 1** - Installs WSL2 and Ubuntu:
+- If WSL isn't installed, you'll need to restart and run again
+- Ubuntu opens in a new window - create your username/password there
+- Once done, close the Ubuntu window
+
+**Phase 2** - Run after Ubuntu setup:
 ```powershell
-# Download the script
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/JRedeker/dot-files/trunk/windows-setup.ps1" -OutFile "windows-setup.ps1"
-
-# Run it
-.\windows-setup.ps1
+.\ws.ps1 -Phase2
 ```
 
-This will:
-1. Install/enable WSL2
-2. Install Ubuntu
-3. Clone this repo and run the full installer
-4. Set up ZSH, OpenCode, Vision, and all tools
+This installs everything inside Ubuntu (ZSH, OpenCode, Vision, etc.)
+
+### What gets installed
+1. WSL2 with Ubuntu
+2. ZSH with Powerlevel10k, autosuggestions, syntax highlighting
+3. OpenCode AI coding assistant
+4. Vision MCP Manager
+5. Node.js, tmux, and dev tools
 
 ## Quick Install (existing WSL2/Linux)
 
