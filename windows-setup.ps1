@@ -106,19 +106,19 @@ try {
 } catch {}
 
 if (-not $wslAvailable) {
-    Write-Host "Installing WSL..." -ForegroundColor Green
-    wsl --install --no-distribution
+    Write-Host "Installing WSL with Ubuntu..." -ForegroundColor Green
+    wsl --install -d Ubuntu
     Write-Host ""
     Write-Host "=============================================" -ForegroundColor Yellow
-    Write-Host "  WSL installed - RESTART REQUIRED" -ForegroundColor Yellow
+    Write-Host "  WSL + Ubuntu installed - RESTART REQUIRED" -ForegroundColor Yellow
     Write-Host "=============================================" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Please:" -ForegroundColor White
     Write-Host "  1. RESTART your computer" -ForegroundColor White
-    Write-Host "  2. Open PowerShell again" -ForegroundColor White
-    Write-Host "  3. Run this command:" -ForegroundColor White
+    Write-Host "  2. Ubuntu will auto-launch - create your username/password" -ForegroundColor White
+    Write-Host "  3. After setup, open PowerShell and run:" -ForegroundColor White
     Write-Host ""
-    Write-Host "     irm https://raw.githubusercontent.com/JRedeker/dot-files/trunk/windows-setup.ps1 -OutFile ws.ps1; .\ws.ps1" -ForegroundColor Cyan
+    Write-Host "     irm https://raw.githubusercontent.com/JRedeker/dot-files/trunk/windows-setup.ps1 -OutFile ws.ps1; .\ws.ps1 -Phase2" -ForegroundColor Cyan
     Write-Host ""
     exit 0
 }
