@@ -101,7 +101,77 @@ else
 fi
 
 # =============================================================================
-# 5. OPENCODE CONFIG
+# 5. VISION MCP MANAGER
+# =============================================================================
+if ! command -v vision &>/dev/null; then
+    log_info "Installing Vision MCP Manager..."
+    curl -fsSL https://raw.githubusercontent.com/Sharper-Flow/Vision-MCP-Manager/trunk/scripts/install.sh | bash
+else
+    log_info "Vision MCP Manager already installed"
+fi
+
+# Create default Vision config directory
+mkdir -p ~/.config/vision
+
+# Copy Vision servers config if it doesn't exist
+if [ ! -f ~/.config/vision/servers.yaml ]; then
+    log_info "Creating default Vision servers.yaml..."
+    cat > ~/.config/vision/servers.yaml << 'VISION_EOF'
+# Vision MCP Server Registry
+# See: https://github.com/Sharper-Flow/Vision-MCP-Manager
+
+servers:
+  # Time - Timezone and scheduling utilities (no API key required)
+  time:
+    port: 6282
+    command: uvx
+    args: ["mcp-server-time", "--local-timezone=America/New_York"]
+    autostart: true
+
+  # Context7 - Library documentation lookup (optional API key)
+  # context7:
+  #   port: 6276
+  #   command: npx
+  #   args: ["-y", "@upstash/context7-mcp@latest"]
+  #   env:
+  #     CONTEXT7_API_KEY: "${CONTEXT7_API_KEY}"
+  #   autostart: true
+
+  # Kagi - Web search and summarization (requires API key)
+  # kagimcp:
+  #   port: 6279
+  #   command: uvx
+  #   args: ["kagimcp"]
+  #   env:
+  #     KAGI_API_KEY: "${KAGI_API_KEY}"
+  #   autostart: true
+
+  # Firecrawl - Web scraping and extraction (requires API key)
+  # firecrawl:
+  #   port: 6281
+  #   command: npx
+  #   args: ["-y", "firecrawl-mcp"]
+  #   env:
+  #     FIRECRAWL_API_KEY: "${FIRECRAWL_API_KEY}"
+  #   autostart: true
+VISION_EOF
+fi
+
+# Create env file placeholder
+if [ ! -f ~/.config/vision/env ]; then
+    log_info "Creating Vision env file placeholder..."
+    cat > ~/.config/vision/env << 'ENV_EOF'
+# Vision MCP Manager - Environment Variables
+# Add your API keys here (this file is gitignored)
+
+# CONTEXT7_API_KEY=ctx7_xxxxxxxxxxxx
+# KAGI_API_KEY=xxxxxxxxxxxxxxxx
+# FIRECRAWL_API_KEY=fc-xxxxxxxxxxxxxxxx
+ENV_EOF
+fi
+
+# =============================================================================
+# 6. OPENCODE CONFIG
 # =============================================================================
 log_info "Setting up OpenCode configuration..."
 mkdir -p ~/.config/opencode
@@ -112,7 +182,7 @@ cp -v "$SCRIPT_DIR/config/opencode/"* ~/.config/opencode/
 log_info "OpenCode config installed to ~/.config/opencode/"
 
 # =============================================================================
-# 6. ZSHRC SETUP
+# 7. ZSHRC SETUP
 # =============================================================================
 ZSHRC_MARKER="# >>> opencode-setup >>>"
 if ! grep -q "$ZSHRC_MARKER" ~/.zshrc 2>/dev/null; then
@@ -142,7 +212,7 @@ else
 fi
 
 # =============================================================================
-# 7. SET DEFAULT SHELL
+# 8. SET DEFAULT SHELL
 # =============================================================================
 if [ "$SHELL" != "$(which zsh)" ]; then
     log_info "Setting ZSH as default shell..."
@@ -153,7 +223,7 @@ else
 fi
 
 # =============================================================================
-# 8. SCRATCH DIRECTORY
+# 9. SCRATCH DIRECTORY
 # =============================================================================
 log_info "Creating scratch directory..."
 mkdir -p ~/scratch ~/dev
@@ -169,10 +239,12 @@ echo ""
 echo "Next steps:"
 echo "  1. Log out and back in (or run: exec zsh)"
 echo "  2. Run 'p10k configure' to set up your prompt theme"
-echo "  3. (Optional) Set MORPH_API_KEY in ~/.config/opencode/zshrc-additions.sh"
-echo "  4. (Optional) Set up MCP servers - see README.md"
+echo "  3. Start Vision daemon: vision daemon start -d"
+echo "  4. Generate OpenCode MCP config: vision init --global"
+echo "  5. (Optional) Add API keys to ~/.config/vision/env"
 echo ""
 echo "Quick start:"
 echo "  - Type 'oc' to launch opencode (wrapped in tmux)"
 echo "  - Type 'cds' to create a dated scratch folder and open opencode"
+echo "  - Type 'vision server list' to see MCP servers"
 echo ""

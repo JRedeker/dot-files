@@ -1,13 +1,13 @@
 # OpenCode Setup Package
 
-A curated OpenCode configuration with ZSH enhancements for WSL2.
+A curated OpenCode configuration with ZSH enhancements and Vision MCP Manager for WSL2.
 
 ## Quick Install
 
 ```bash
-# Extract the package
-tar -xzf opencode-setup.tar.gz
-cd opencode-setup
+# Clone the repo
+git clone https://github.com/JRedeker/dot-files.git
+cd dot-files
 
 # Run the installer
 chmod +x install.sh
@@ -18,6 +18,12 @@ exec zsh
 
 # Configure your prompt (first time)
 p10k configure
+
+# Start Vision MCP daemon
+vision daemon start -d
+
+# Generate OpenCode MCP config
+vision init --global
 ```
 
 ## What's Included
@@ -30,6 +36,13 @@ p10k configure
 - **mcp-tools.md** - MCP tool selection guide
 - **goost_instructions.md** - Contract-based task persistence
 - **MORPH_INSTRUCTIONS.md** - Fast code editing with Morph AI
+
+### Vision MCP Manager
+[Vision](https://github.com/Sharper-Flow/Vision-MCP-Manager) is a Go-native daemon that centralizes MCP server management:
+- Single YAML config for all MCP servers
+- Automatic process supervision with restarts
+- stdio-to-HTTP bridging on dedicated ports
+- One command to generate client configs
 
 ### ZSH Enhancements
 - Powerlevel10k theme
@@ -44,61 +57,85 @@ p10k configure
 - `oc-killall` - Kill all opencode sessions
 - `cds` - Create dated scratch folder and open opencode
 
-## Optional: MCP Server Setup
+## MCP Server Setup with Vision
 
-The config includes MCP server definitions (disabled by default). To enable them:
+Vision manages all your MCP servers from `~/.config/vision/servers.yaml`. The installer creates a default config with the time server enabled.
 
-### Context7 (Library Documentation)
+### Managing Servers
+
 ```bash
-npx @anthropic/context7-mcp --port 6276
-```
-Then set `"enabled": true` in opencode.json for context7.
+# Start the daemon (background)
+vision daemon start -d
 
-### Kagi Search (requires API key)
-```bash
-# Get API key from https://kagi.com/settings?p=api
-export KAGI_API_KEY="your-key"
-npx @anthropic/kagi-mcp --port 6279
-```
+# Check daemon status
+vision daemon status
 
-### arXiv (Academic Papers)
-```bash
-npx @anthropic/arxiv-mcp --port 6280
-```
+# List servers
+vision server list
 
-### Firecrawl (Web Scraping - requires API key)
-```bash
-# Get API key from https://firecrawl.dev
-export FIRECRAWL_API_KEY="your-key"
-npx @anthropic/firecrawl-mcp --port 6281
+# Add a new server
+vision server add context7 --command npx --args "-y @upstash/context7-mcp@latest" --port 6276
+
+# Generate OpenCode config
+vision init --global
 ```
 
-### Time Server
+### Adding API Keys
+
+Edit `~/.config/vision/env` to add your API keys:
+
 ```bash
-npx @anthropic/time-mcp --port 6282
+CONTEXT7_API_KEY=ctx7_xxxxxxxxxxxx
+KAGI_API_KEY=xxxxxxxxxxxxxxxx
+FIRECRAWL_API_KEY=fc-xxxxxxxxxxxxxxxx
 ```
 
-### Fetch MCP (Simple URL fetching)
-```bash
-npx @anthropic/fetch-mcp --port 6283
+Then uncomment the corresponding servers in `~/.config/vision/servers.yaml`.
+
+### Example servers.yaml
+
+```yaml
+servers:
+  # Time - No API key required
+  time:
+    port: 6282
+    command: uvx
+    args: ["mcp-server-time", "--local-timezone=America/New_York"]
+    autostart: true
+
+  # Context7 - Library documentation
+  context7:
+    port: 6276
+    command: npx
+    args: ["-y", "@upstash/context7-mcp@latest"]
+    env:
+      CONTEXT7_API_KEY: "${CONTEXT7_API_KEY}"
+    autostart: true
+
+  # Kagi - Web search
+  kagimcp:
+    port: 6279
+    command: uvx
+    args: ["kagimcp"]
+    env:
+      KAGI_API_KEY: "${KAGI_API_KEY}"
+    autostart: true
 ```
 
-### Running MCP Servers Persistently
+### Running Vision as a Service
 
-For persistent MCP servers, consider using PM2:
+For always-on operation:
 
 ```bash
-npm install -g pm2
+# Install systemd user service
+mkdir -p ~/.config/systemd/user
+curl -fsSL https://raw.githubusercontent.com/Sharper-Flow/Vision-MCP-Manager/trunk/scripts/vision-user.service \
+  -o ~/.config/systemd/user/vision.service
+systemctl --user daemon-reload
+systemctl --user enable --now vision
 
-# Start servers
-pm2 start "npx @anthropic/context7-mcp --port 6276" --name context7
-pm2 start "npx @anthropic/time-mcp --port 6282" --name time-mcp
-
-# Save configuration
-pm2 save
-
-# Auto-start on boot
-pm2 startup
+# Check status
+systemctl --user status vision
 ```
 
 ## Optional: Morph API Key
@@ -123,6 +160,10 @@ export MORPH_API_KEY="your-morph-api-key"
   MORPH_INSTRUCTIONS.md
   zshrc-additions.sh   # ZSH config
 
+~/.config/vision/
+  servers.yaml         # MCP server registry
+  env                  # API keys (gitignored)
+
 ~/.zsh/plugins/
   powerlevel10k/
   zsh-autosuggestions/
@@ -134,6 +175,25 @@ export MORPH_API_KEY="your-morph-api-key"
 ### OpenCode not found
 ```bash
 export PATH=$HOME/.opencode/bin:$PATH
+```
+
+### Vision not found
+```bash
+# Reinstall Vision
+curl -fsSL https://raw.githubusercontent.com/Sharper-Flow/Vision-MCP-Manager/trunk/scripts/install.sh | bash
+```
+
+### MCP servers not connecting
+```bash
+# Check Vision daemon status
+vision daemon status
+
+# Restart daemon
+vision daemon stop
+vision daemon start -d
+
+# Check server logs
+vision server info <server-name>
 ```
 
 ### ZSH plugins not loading
@@ -150,6 +210,6 @@ oc-killall
 
 ### Reset to defaults
 ```bash
-rm -rf ~/.config/opencode
+rm -rf ~/.config/opencode ~/.config/vision
 ./install.sh
 ```
