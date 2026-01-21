@@ -2,7 +2,31 @@
 
 A curated OpenCode configuration with ZSH enhancements and Vision MCP Manager for WSL2.
 
-## Quick Install
+## Fresh Windows Install (WSL2 from scratch)
+
+Run this in **PowerShell** (as Administrator):
+
+```powershell
+# One-liner: Download and run the Windows setup script
+irm https://raw.githubusercontent.com/JRedeker/dot-files/trunk/windows-setup.ps1 | iex
+```
+
+Or step-by-step:
+```powershell
+# Download the script
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/JRedeker/dot-files/trunk/windows-setup.ps1" -OutFile "windows-setup.ps1"
+
+# Run it
+.\windows-setup.ps1
+```
+
+This will:
+1. Install/enable WSL2
+2. Install Ubuntu
+3. Clone this repo and run the full installer
+4. Set up ZSH, OpenCode, Vision, and all tools
+
+## Quick Install (existing WSL2/Linux)
 
 ```bash
 # Clone the repo
