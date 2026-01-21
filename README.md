@@ -7,6 +7,9 @@ A curated OpenCode configuration with ZSH enhancements and Vision MCP Manager fo
 Run this in **PowerShell** (as Administrator):
 
 ```powershell
+# Allow scripts to run (one-time)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
 # Download and run the setup script
 irm https://raw.githubusercontent.com/JRedeker/dot-files/trunk/windows-setup.ps1 -OutFile ws.ps1; .\ws.ps1
 ```
