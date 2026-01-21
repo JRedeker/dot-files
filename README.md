@@ -50,7 +50,66 @@ vision daemon start -d
 vision init --global
 ```
 
-## What's Included
+## What is OpenCode?
+
+[OpenCode](https://opencode.ai) is an open-source AI coding assistant CLI that brings powerful AI models directly to your terminal. Think of it as a local, customizable alternative to cloud-based coding assistants.
+
+### Key Features
+- **Multiple AI providers** - Use Claude, GPT, Gemini, and more
+- **MCP Support** - Connect to Model Context Protocol servers for extended capabilities
+- **Customizable** - Full control over prompts, rules, and behavior
+- **Terminal-native** - Works entirely in your shell, no browser needed
+
+### Manual OpenCode Installation
+
+If you just want OpenCode without the full setup:
+
+```bash
+# Install OpenCode
+curl -fsSL https://opencode.ai/install | bash
+
+# Add to PATH (add this to your .bashrc or .zshrc)
+export PATH=$HOME/.opencode/bin:$PATH
+
+# Launch
+opencode
+```
+
+### First Run
+
+When you first launch OpenCode, you'll need to authenticate with an AI provider:
+
+1. **Run `opencode`** - Opens the TUI interface
+2. **Press `Ctrl+L`** - Open provider login
+3. **Select a provider** - Choose Claude, OpenAI, Google, etc.
+4. **Authenticate** - Follow the OAuth flow in your browser
+
+### Basic Usage
+
+```bash
+# Start OpenCode in current directory
+opencode
+
+# Start with a specific prompt
+opencode "explain this codebase"
+
+# Start in a specific directory
+opencode --cwd /path/to/project
+```
+
+### Keybindings (in OpenCode TUI)
+
+| Key | Action |
+|-----|--------|
+| `Enter` | Send message |
+| `Shift+Enter` | New line |
+| `Ctrl+C` | Cancel current operation |
+| `Ctrl+L` | Provider login |
+| `Ctrl+K` | Clear conversation |
+| `Ctrl+O` | Open file picker |
+| `?` | Show help |
+
+## What's Included in This Setup
 
 ### OpenCode Configuration
 - **opencode.json** - Main config with model definitions and MCP server placeholders
@@ -80,6 +139,51 @@ vision init --global
 - `oc-list` - List running opencode sessions
 - `oc-killall` - Kill all opencode sessions
 - `cds` - Create dated scratch folder and open opencode
+
+## Using OpenCode After Setup
+
+### Quick Start
+
+```bash
+# Launch OpenCode (wrapped in tmux for crash isolation)
+oc
+
+# Or create a scratch folder and launch
+cds
+```
+
+### First Time Authentication
+
+1. Launch with `oc`
+2. Press `Ctrl+L` to open provider login
+3. Select your AI provider (Claude, OpenAI, Google, etc.)
+4. Complete OAuth in your browser
+5. Return to terminal - you're ready to code!
+
+### Example Workflows
+
+```bash
+# Start a new project
+mkdir ~/dev/my-project && cd ~/dev/my-project
+oc
+# Then ask: "Initialize a new TypeScript project with ESLint and Prettier"
+
+# Debug an issue
+cd ~/dev/existing-project
+oc
+# Then ask: "Why is the login function failing? Check src/auth/"
+
+# Quick scratch work
+cds
+# Creates ~/scratch/2025-01-21/ and opens OpenCode
+# Great for experiments and one-off scripts
+```
+
+### Tips
+
+- **Use `oc` instead of `opencode`** - It wraps in tmux, preventing WSL2 crashes from killing your session
+- **Session recovery** - If your terminal crashes, run `oc-list` to see running sessions, then `tmux attach -t <session>`
+- **Kill stuck sessions** - Run `oc-killall` to terminate all OpenCode tmux sessions
 
 ## MCP Server Setup with Vision
 
